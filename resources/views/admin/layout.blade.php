@@ -91,13 +91,11 @@
 
 
             <a
-                href="#"
-                class="block px-4 py-3 rounded-lg hover:bg-slate-700"
-            >
-                Notices
-            </a>
-
-
+    href="{{ route('admin.notices.index') }}"
+    class="block px-4 py-3 rounded-lg hover:bg-slate-700"
+>
+    Notices
+</a>
             <a
                 href="#"
                 class="block px-4 py-3 rounded-lg hover:bg-slate-700"

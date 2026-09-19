@@ -8,6 +8,8 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminCategoryController;
 use App\Http\Controllers\AdminFaqController;
 use App\Http\Controllers\StudentFaqController;
+use App\Http\Controllers\AdminNoticeController;
+use App\Http\Controllers\StudentNoticeController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -101,9 +103,10 @@ Route::middleware(['auth', 'role:student'])->group(function () {
 )->name('student.faqs');
 
     // Notices
-    Route::get('/student/notices', function () {
-        return view('student.notices');
-    })->name('student.notices');
+    Route::get(
+    '/student/notices',
+    [StudentNoticeController::class, 'index']
+)->name('student.notices');
 
 });
 
@@ -162,6 +165,61 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
 // ========================================
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
+
+
+Route::get(
+    '/admin/notices',
+    [AdminNoticeController::class, 'index']
+)->name('admin.notices.index');
+
+
+Route::get(
+    '/admin/notices/create',
+    [AdminNoticeController::class, 'create']
+)->name('admin.notices.create');
+
+
+Route::post(
+    '/admin/notices',
+    [AdminNoticeController::class, 'store']
+)->name('admin.notices.store');
+
+
+Route::get(
+    '/admin/notices/{notice}/edit',
+    [AdminNoticeController::class, 'edit']
+)->name('admin.notices.edit');
+
+
+Route::put(
+    '/admin/notices/{notice}',
+    [AdminNoticeController::class, 'update']
+)->name('admin.notices.update');
+
+
+Route::patch(
+    '/admin/notices/{notice}/status',
+    [AdminNoticeController::class, 'toggleStatus']
+)->name('admin.notices.status');
+
+
+Route::delete(
+    '/admin/notices/{notice}',
+    [AdminNoticeController::class, 'destroy']
+)->name('admin.notices.destroy');
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     Route::get('/admin/dashboard', function () {
         return view('admin.dashboard');
