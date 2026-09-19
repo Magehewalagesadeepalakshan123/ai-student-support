@@ -51,19 +51,19 @@
 
 
             <a
-                href="#"
-                class="block px-4 py-3 rounded-lg hover:bg-slate-700"
-            >
-                Students
-            </a>
+    href="{{ route('admin.students') }}"
+    class="block px-4 py-3 rounded-lg hover:bg-slate-700"
+>
+    Students
+</a>
 
 
             <a
-                href="#"
-                class="block px-4 py-3 rounded-lg hover:bg-slate-700"
-            >
-                Staff
-            </a>
+    href="{{ route('admin.staff') }}"
+    class="block px-4 py-3 rounded-lg hover:bg-slate-700"
+>
+    Staff
+</a>
 
 
             <a

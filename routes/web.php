@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentTicketController;
 use App\Http\Controllers\StaffTicketController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -163,8 +164,65 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
-});
 
+    // STUDENTS
+
+    Route::get(
+        '/admin/students',
+        [AdminUserController::class, 'students']
+    )->name('admin.students');
+
+
+    // STAFF
+
+    Route::get(
+        '/admin/staff',
+        [AdminUserController::class, 'staff']
+    )->name('admin.staff');
+
+
+    Route::get(
+        '/admin/staff/create',
+        [AdminUserController::class, 'createStaff']
+    )->name('admin.staff.create');
+
+
+    Route::post(
+        '/admin/staff',
+        [AdminUserController::class, 'storeStaff']
+    )->name('admin.staff.store');
+
+
+    // EDIT USER
+
+    Route::get(
+        '/admin/users/{user}/edit',
+        [AdminUserController::class, 'edit']
+    )->name('admin.users.edit');
+
+
+    Route::put(
+        '/admin/users/{user}',
+        [AdminUserController::class, 'update']
+    )->name('admin.users.update');
+
+
+    // STATUS
+
+    Route::patch(
+        '/admin/users/{user}/status',
+        [AdminUserController::class, 'toggleStatus']
+    )->name('admin.users.status');
+
+
+    // DELETE
+
+    Route::delete(
+        '/admin/users/{user}',
+        [AdminUserController::class, 'destroy']
+    )->name('admin.users.destroy');
+
+});
 
 // ========================================
 // PROFILE ROUTES
