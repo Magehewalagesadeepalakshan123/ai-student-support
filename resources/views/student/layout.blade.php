@@ -33,11 +33,12 @@
                class="block px-4 py-3 rounded-lg hover:bg-slate-700">
                 Dashboard
             </a>
-
-            <a href="{{ route('student.ai') }}"
-               class="block px-4 py-3 rounded-lg hover:bg-slate-700">
-                AI Assistant
-            </a>
+<a
+    href="{{ route('student.ai.history') }}"
+    class="block px-4 py-3 rounded-lg hover:bg-blue-700"
+>
+    AI History
+</a>
 
             <a href="{{ route('student.tickets') }}"
                class="block px-4 py-3 rounded-lg hover:bg-slate-700">

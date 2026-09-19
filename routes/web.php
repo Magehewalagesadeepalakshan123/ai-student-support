@@ -72,6 +72,12 @@ Route::post(
 )->name('student.ai.ask');
 
 
+Route::get(
+    '/student/ai-history',
+    [StudentAiController::class, 'history']
+)->name('student.ai.history');
+
+
     // Ticket List
     Route::get(
         '/student/tickets',

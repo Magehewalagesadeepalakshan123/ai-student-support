@@ -51,4 +51,9 @@ class User extends Authenticatable
             TicketReply::class
         );
     }
+
+    public function aiQuestions()
+{
+    return $this->hasMany(AiQuestion::class);
+}
 }

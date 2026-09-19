@@ -28,4 +28,9 @@ class KnowledgeArticle extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function aiQuestions()
+{
+    return $this->hasMany(AiQuestion::class);
+}
 }

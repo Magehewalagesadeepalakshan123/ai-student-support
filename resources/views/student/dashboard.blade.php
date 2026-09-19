@@ -25,6 +25,16 @@
 
     <div class="bg-white p-6 rounded-xl shadow-sm">
 
+    <p class="text-sm text-gray-500">
+        AI Questions
+    </p>
+
+    <h2 class="text-3xl font-bold mt-2 text-purple-600">
+        {{ $aiQuestionsCount }}
+    </h2>
+
+</div>
+
         <p class="text-sm text-gray-500">
             Total Tickets
         </p>
