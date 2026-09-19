@@ -11,6 +11,7 @@ use App\Http\Controllers\StudentFaqController;
 use App\Http\Controllers\AdminNoticeController;
 use App\Http\Controllers\StudentNoticeController;
 use App\Http\Controllers\AdminKnowledgeController;
+use App\Http\Controllers\StudentAiController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -56,10 +57,19 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     [DashboardController::class, 'student']
 )->name('student.dashboard');
 
-    // AI Assistant
-    Route::get('/student/ai-assistant', function () {
-        return view('student.ai');
-    })->name('student.ai');
+    
+   // AI Assistant 
+Route::get(
+    '/student/ai-assistant',
+    [StudentAiController::class, 'index']
+)->name('student.ai');
+
+
+// Ask AI Assistant
+Route::post(
+    '/student/ai-assistant',
+    [StudentAiController::class, 'ask']
+)->name('student.ai.ask');
 
 
     // Ticket List
