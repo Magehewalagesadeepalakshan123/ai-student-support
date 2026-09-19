@@ -82,12 +82,12 @@
             </a>
 
 
-            <a
-                href="#"
-                class="block px-4 py-3 rounded-lg hover:bg-slate-700"
-            >
-                FAQs
-            </a>
+           <a
+    href="{{ route('admin.faqs.index') }}"
+    class="block px-4 py-3 rounded-lg hover:bg-slate-700"
+>
+    FAQs
+</a>
 
 
             <a

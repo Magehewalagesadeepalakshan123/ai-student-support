@@ -22,8 +22,19 @@ class Category extends Model
         ];
     }
 
+    /**
+     * Tickets that belong to this category.
+     */
     public function tickets()
     {
         return $this->hasMany(Ticket::class);
+    }
+
+    /**
+     * FAQs that belong to this category.
+     */
+    public function faqs()
+    {
+        return $this->hasMany(Faq::class);
     }
 }

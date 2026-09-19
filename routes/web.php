@@ -6,6 +6,8 @@ use App\Http\Controllers\StaffTicketController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminCategoryController;
+use App\Http\Controllers\AdminFaqController;
+use App\Http\Controllers\StudentFaqController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -93,10 +95,10 @@ Route::middleware(['auth', 'role:student'])->group(function () {
 
 
     // FAQs
-    Route::get('/student/faqs', function () {
-        return view('student.faqs');
-    })->name('student.faqs');
-
+    Route::get(
+    '/student/faqs',
+    [StudentFaqController::class, 'index']
+)->name('student.faqs');
 
     // Notices
     Route::get('/student/notices', function () {
@@ -210,6 +212,53 @@ Route::delete(
     '/admin/categories/{category}',
     [AdminCategoryController::class, 'destroy']
 )->name('admin.categories.destroy');
+
+
+
+// ========================================
+// FAQ MANAGEMENT
+// ========================================
+
+Route::get(
+    '/admin/faqs',
+    [AdminFaqController::class, 'index']
+)->name('admin.faqs.index');
+
+
+Route::get(
+    '/admin/faqs/create',
+    [AdminFaqController::class, 'create']
+)->name('admin.faqs.create');
+
+
+Route::post(
+    '/admin/faqs',
+    [AdminFaqController::class, 'store']
+)->name('admin.faqs.store');
+
+
+Route::get(
+    '/admin/faqs/{faq}/edit',
+    [AdminFaqController::class, 'edit']
+)->name('admin.faqs.edit');
+
+
+Route::put(
+    '/admin/faqs/{faq}',
+    [AdminFaqController::class, 'update']
+)->name('admin.faqs.update');
+
+
+Route::patch(
+    '/admin/faqs/{faq}/status',
+    [AdminFaqController::class, 'toggleStatus']
+)->name('admin.faqs.status');
+
+
+Route::delete(
+    '/admin/faqs/{faq}',
+    [AdminFaqController::class, 'destroy']
+)->name('admin.faqs.destroy');
 
 
     // STUDENTS
