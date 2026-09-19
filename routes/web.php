@@ -5,6 +5,7 @@ use App\Http\Controllers\StudentTicketController;
 use App\Http\Controllers\StaffTicketController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminCategoryController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -163,6 +164,52 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+
+
+    // ========================================
+// CATEGORY MANAGEMENT
+// ========================================
+
+Route::get(
+    '/admin/categories',
+    [AdminCategoryController::class, 'index']
+)->name('admin.categories.index');
+
+
+Route::get(
+    '/admin/categories/create',
+    [AdminCategoryController::class, 'create']
+)->name('admin.categories.create');
+
+
+Route::post(
+    '/admin/categories',
+    [AdminCategoryController::class, 'store']
+)->name('admin.categories.store');
+
+
+Route::get(
+    '/admin/categories/{category}/edit',
+    [AdminCategoryController::class, 'edit']
+)->name('admin.categories.edit');
+
+
+Route::put(
+    '/admin/categories/{category}',
+    [AdminCategoryController::class, 'update']
+)->name('admin.categories.update');
+
+
+Route::patch(
+    '/admin/categories/{category}/status',
+    [AdminCategoryController::class, 'toggleStatus']
+)->name('admin.categories.status');
+
+
+Route::delete(
+    '/admin/categories/{category}',
+    [AdminCategoryController::class, 'destroy']
+)->name('admin.categories.destroy');
 
 
     // STUDENTS

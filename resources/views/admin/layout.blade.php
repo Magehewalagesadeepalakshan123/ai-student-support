@@ -67,11 +67,11 @@
 
 
             <a
-                href="#"
-                class="block px-4 py-3 rounded-lg hover:bg-slate-700"
-            >
-                Categories
-            </a>
+    href="{{ route('admin.categories.index') }}"
+    class="block px-4 py-3 rounded-lg hover:bg-slate-700"
+>
+    Categories
+</a>
 
 
             <a
