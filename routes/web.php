@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminFaqController;
 use App\Http\Controllers\StudentFaqController;
 use App\Http\Controllers\AdminNoticeController;
 use App\Http\Controllers\StudentNoticeController;
+use App\Http\Controllers\AdminKnowledgeController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -165,6 +166,59 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
 // ========================================
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
+
+// ========================================
+// KNOWLEDGE BASE
+// ========================================
+
+Route::get(
+    '/admin/knowledge',
+    [AdminKnowledgeController::class, 'index']
+)->name('admin.knowledge.index');
+
+
+Route::get(
+    '/admin/knowledge/create',
+    [AdminKnowledgeController::class, 'create']
+)->name('admin.knowledge.create');
+
+
+Route::post(
+    '/admin/knowledge',
+    [AdminKnowledgeController::class, 'store']
+)->name('admin.knowledge.store');
+
+
+Route::get(
+    '/admin/knowledge/{article}/edit',
+    [AdminKnowledgeController::class, 'edit']
+)->name('admin.knowledge.edit');
+
+
+Route::put(
+    '/admin/knowledge/{article}',
+    [AdminKnowledgeController::class, 'update']
+)->name('admin.knowledge.update');
+
+
+Route::patch(
+    '/admin/knowledge/{article}/status',
+    [AdminKnowledgeController::class, 'toggleStatus']
+)->name('admin.knowledge.status');
+
+
+Route::delete(
+    '/admin/knowledge/{article}',
+    [AdminKnowledgeController::class, 'destroy']
+)->name('admin.knowledge.destroy');
+
+
+
+
+
+
+
+
 
 
 Route::get(

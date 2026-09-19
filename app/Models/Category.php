@@ -37,4 +37,9 @@ class Category extends Model
     {
         return $this->hasMany(Faq::class);
     }
+
+    public function knowledgeArticles()
+{
+    return $this->hasMany(KnowledgeArticle::class);
+}
 }

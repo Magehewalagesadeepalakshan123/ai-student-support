@@ -97,11 +97,11 @@
     Notices
 </a>
             <a
-                href="#"
-                class="block px-4 py-3 rounded-lg hover:bg-slate-700"
-            >
-                Knowledge Base
-            </a>
+    href="{{ route('admin.knowledge.index') }}"
+    class="block px-4 py-3 rounded-lg hover:bg-slate-700"
+>
+    Knowledge Base
+</a>
 
 
             <a
