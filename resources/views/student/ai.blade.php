@@ -147,30 +147,100 @@
 
                             @if($article)
 
-                                <div class="mt-4">
+    <div class="mt-5 border-t border-blue-100 pt-4">
 
-                                    <p class="text-sm text-gray-500">
-                                        Answer found from:
-                                    </p>
+        <div class="flex flex-wrap items-center gap-3">
 
-                                    <p class="font-semibold text-gray-700 mt-1">
-                                        {{ $article->title }}
-                                    </p>
+            <div>
+
+                <p class="text-sm text-gray-500">
+                    Knowledge Source
+                </p>
+
+                <p class="font-semibold text-gray-800">
+                    {{ $article->title }}
+                </p>
+
+            </div>
 
 
-                                    @if($article->category)
+            @if($article->category)
 
-                                        <span class="inline-block mt-2 bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs">
+                <span
+                    class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                >
+                    {{ $article->category->name }}
+                </span>
 
-                                            {{ $article->category->name }}
+            @endif
 
-                                        </span>
 
-                                    @endif
+            @isset($confidenceLabel)
 
-                                </div>
+                @if($confidenceLabel === 'High')
 
-                            @endif
+                    <span
+                        class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
+                    >
+                        High Confidence
+                    </span>
+
+                @elseif($confidenceLabel === 'Medium')
+
+                    <span
+                        class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                    >
+                        Medium Confidence
+                    </span>
+
+                @else
+
+                    <span
+                        class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm"
+                    >
+                        Low Confidence
+                    </span>
+
+                @endif
+
+            @endisset
+
+        </div>
+
+
+        @isset($confidencePercent)
+
+            <div class="mt-4">
+
+                <div class="flex justify-between text-sm mb-1">
+
+                    <span class="text-gray-500">
+                        Match confidence
+                    </span>
+
+                    <span class="font-semibold">
+                        {{ $confidencePercent }}%
+                    </span>
+
+                </div>
+
+
+                <div class="w-full bg-gray-200 rounded-full h-2">
+
+                    <div
+                        class="bg-blue-600 h-2 rounded-full"
+                        style="width: {{ $confidencePercent }}%"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        @endisset
+
+    </div>
+
+@endif
 
                         </div>
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class StudentAiController extends Controller
 {
     // =========================================
-    // AI PAGE
+    // AI ASSISTANT PAGE
     // =========================================
 
     public function index()
@@ -43,7 +43,7 @@ class StudentAiController extends Controller
 
 
     // =========================================
-    // PROCESS QUESTION
+    // ASK AI
     // =========================================
 
     public function ask(Request $request)
@@ -61,74 +61,30 @@ class StudentAiController extends Controller
         );
 
         $normalizedQuestion =
-            Str::lower($question);
+            $this->normalizeText($question);
 
 
-        // Words that are not useful
-        // when searching knowledge articles.
+        // =========================================
+        // GET SEARCH WORDS
+        // =========================================
 
-        $stopWords = [
-            'a',
-            'an',
-            'the',
-            'is',
-            'are',
-            'am',
-            'i',
-            'my',
-            'me',
-            'how',
-            'what',
-            'where',
-            'when',
-            'why',
-            'can',
-            'could',
-            'do',
-            'does',
-            'to',
-            'for',
-            'of',
-            'in',
-            'on',
-            'and',
-            'or',
-            'please',
-            'help',
-            'with',
-        ];
-
-
-        $cleanQuestion = preg_replace(
-            '/[^a-zA-Z0-9\s]/',
-            ' ',
+        $keywords = $this->extractKeywords(
             $normalizedQuestion
         );
 
 
-        $words = preg_split(
-            '/\s+/',
-            $cleanQuestion
+        // =========================================
+        // ADD SYNONYMS
+        // =========================================
+
+        $keywords = $this->expandSynonyms(
+            $keywords
         );
 
 
-        $keywords = collect($words)
-            ->filter(
-                function ($word) use ($stopWords) {
-
-                    return strlen($word) >= 2
-                        && !in_array(
-                            $word,
-                            $stopWords
-                        );
-
-                }
-            )
-            ->unique()
-            ->values();
-
-
-        // Active Knowledge Base articles
+        // =========================================
+        // GET ACTIVE KNOWLEDGE ARTICLES
+        // =========================================
 
         $articles = KnowledgeArticle::with(
             'category'
@@ -137,7 +93,9 @@ class StudentAiController extends Controller
             ->get();
 
 
-        // Calculate relevance score
+        // =========================================
+        // SCORE ARTICLES
+        // =========================================
 
         $results = $articles
             ->map(
@@ -148,24 +106,23 @@ class StudentAiController extends Controller
 
                     $score = 0;
 
-
-                    $title = Str::lower(
+                    $title = $this->normalizeText(
                         $article->title ?? ''
                     );
 
-
-                    $content = Str::lower(
+                    $content = $this->normalizeText(
                         $article->content ?? ''
                     );
 
-
                     $articleKeywords =
-                        Str::lower(
+                        $this->normalizeText(
                             $article->keywords ?? ''
                         );
 
 
-                    // Exact question phrase
+                    // =========================================
+                    // EXACT QUESTION MATCH
+                    // =========================================
 
                     if (
                         $normalizedQuestion !== ''
@@ -175,19 +132,31 @@ class StudentAiController extends Controller
                             $normalizedQuestion
                         )
                     ) {
-                        $score += 20;
+                        $score += 25;
                     }
 
 
-                    foreach (
-                        $keywords as $keyword
-                    ) {
+                    // =========================================
+                    // WORD MATCHING
+                    // =========================================
 
-                        // Title = strongest
+                    foreach ($keywords as $keyword) {
 
+                        // Title has highest importance
                         if (
                             Str::contains(
                                 $title,
+                                $keyword
+                            )
+                        ) {
+                            $score += 6;
+                        }
+
+
+                        // Knowledge keywords
+                        if (
+                            Str::contains(
+                                $articleKeywords,
                                 $keyword
                             )
                         ) {
@@ -195,28 +164,47 @@ class StudentAiController extends Controller
                         }
 
 
-                        // Keywords field
-
-                        if (
-                            Str::contains(
-                                $articleKeywords,
-                                $keyword
-                            )
-                        ) {
-                            $score += 4;
-                        }
-
-
-                        // Article content
-
+                        // Content
                         if (
                             Str::contains(
                                 $content,
                                 $keyword
                             )
                         ) {
-                            $score += 1;
+                            $score += 2;
                         }
+                    }
+
+
+                    // =========================================
+                    // BONUS FOR MULTIPLE MATCHES
+                    // =========================================
+
+                    $matchedWords = 0;
+
+                    foreach ($keywords as $keyword) {
+
+                        if (
+                            Str::contains(
+                                $title . ' '
+                                . $articleKeywords
+                                . ' '
+                                . $content,
+                                $keyword
+                            )
+                        ) {
+                            $matchedWords++;
+                        }
+                    }
+
+
+                    if ($matchedWords >= 3) {
+
+                        $score += 5;
+
+                    } elseif ($matchedWords >= 2) {
+
+                        $score += 2;
                     }
 
 
@@ -231,7 +219,17 @@ class StudentAiController extends Controller
             ->values();
 
 
+        // =========================================
+        // BEST RESULT
+        // =========================================
+
         $bestResult = $results->first();
+
+
+        // Minimum score required before
+        // trusting a knowledge article.
+
+        $minimumScore = 4;
 
 
         // =========================================
@@ -241,7 +239,7 @@ class StudentAiController extends Controller
         if (
             $bestResult
             &&
-            $bestResult['score'] > 0
+            $bestResult['score'] >= $minimumScore
         ) {
 
             $article =
@@ -250,18 +248,42 @@ class StudentAiController extends Controller
             $matchScore =
                 $bestResult['score'];
 
-            $answer =
-                $article->content;
 
+            // =========================================
+            // CONFIDENCE
+            // =========================================
+
+            [
+                $confidenceLabel,
+                $confidencePercent
+            ] = $this->calculateConfidence(
+                $matchScore
+            );
+
+
+            // =========================================
+            // FRIENDLIER ANSWER
+            // =========================================
+
+            $answer =
+                "I found information that should help.\n\n"
+                . $article->content;
+
+
+            // =========================================
+            // RELATED ARTICLES
+            // =========================================
 
             $relatedArticles = $results
                 ->filter(
                     function ($result) use (
-                        $article
+                        $article,
+                        $minimumScore
                     ) {
 
                         return
-                            $result['score'] > 0
+                            $result['score']
+                                >= $minimumScore
                             &&
                             $result['article']->id
                                 !== $article->id;
@@ -272,7 +294,9 @@ class StudentAiController extends Controller
                 ->pluck('article');
 
 
-            // Save question history
+            // =========================================
+            // SAVE QUESTION
+            // =========================================
 
             AiQuestion::create([
                 'user_id' =>
@@ -297,7 +321,7 @@ class StudentAiController extends Controller
         }
 
         // =========================================
-        // NO ANSWER FOUND
+        // NO RELIABLE ANSWER
         // =========================================
 
         else {
@@ -306,16 +330,21 @@ class StudentAiController extends Controller
 
             $matchScore = 0;
 
+            $confidenceLabel = 'No Match';
+
+            $confidencePercent = 0;
+
             $relatedArticles =
                 collect();
 
 
             $answer =
-                "I couldn't find a suitable answer "
-                . "in the knowledge base. "
-                . "Try asking using different words, "
-                . "check the FAQs, or create a "
-                . "support ticket.";
+                "I couldn't find a reliable answer "
+                . "for that question in the university "
+                . "knowledge base.\n\n"
+                . "Try asking the question using different "
+                . "words, check the FAQs, or create a "
+                . "support ticket so a staff member can help.";
 
 
             AiQuestion::create([
@@ -346,8 +375,279 @@ class StudentAiController extends Controller
                 'question',
                 'answer',
                 'article',
-                'relatedArticles'
+                'relatedArticles',
+                'confidenceLabel',
+                'confidencePercent',
+                'matchScore'
             )
         );
+    }
+
+
+    // =========================================
+    // NORMALIZE TEXT
+    // =========================================
+
+    private function normalizeText(
+        string $text
+    ): string {
+
+        $text = Str::lower($text);
+
+        $text = preg_replace(
+            '/[^a-z0-9\s]/',
+            ' ',
+            $text
+        );
+
+        $text = preg_replace(
+            '/\s+/',
+            ' ',
+            $text
+        );
+
+        return trim($text);
+    }
+
+
+    // =========================================
+    // EXTRACT IMPORTANT WORDS
+    // =========================================
+
+    private function extractKeywords(
+        string $question
+    ) {
+
+        $stopWords = [
+            'a',
+            'an',
+            'the',
+            'is',
+            'are',
+            'am',
+            'i',
+            'my',
+            'me',
+            'we',
+            'our',
+            'you',
+            'your',
+            'how',
+            'what',
+            'where',
+            'when',
+            'why',
+            'who',
+            'can',
+            'could',
+            'would',
+            'should',
+            'do',
+            'does',
+            'did',
+            'to',
+            'for',
+            'of',
+            'in',
+            'on',
+            'at',
+            'and',
+            'or',
+            'please',
+            'help',
+            'with',
+            'about',
+            'from',
+        ];
+
+
+        $words = preg_split(
+            '/\s+/',
+            $question
+        );
+
+
+        return collect($words)
+            ->filter(
+                function ($word) use (
+                    $stopWords
+                ) {
+
+                    return
+                        strlen($word) >= 2
+                        &&
+                        !in_array(
+                            $word,
+                            $stopWords
+                        );
+
+                }
+            )
+            ->unique()
+            ->values();
+    }
+
+
+    // =========================================
+    // SYNONYM SUPPORT
+    // =========================================
+
+    private function expandSynonyms(
+        $keywords
+    ) {
+
+        $synonyms = [
+
+            'password' => [
+                'login',
+                'account',
+                'reset',
+                'forgot',
+            ],
+
+            'login' => [
+                'password',
+                'account',
+                'signin',
+            ],
+
+            'exam' => [
+                'examination',
+                'timetable',
+                'results',
+            ],
+
+            'examination' => [
+                'exam',
+                'timetable',
+                'results',
+            ],
+
+            'fee' => [
+                'payment',
+                'payments',
+                'fees',
+            ],
+
+            'payment' => [
+                'fee',
+                'fees',
+                'receipt',
+                'accounts',
+            ],
+
+            'register' => [
+                'registration',
+                'enrol',
+                'enrollment',
+            ],
+
+            'registration' => [
+                'register',
+                'enrol',
+                'semester',
+            ],
+
+            'wifi' => [
+                'internet',
+                'network',
+                'connection',
+            ],
+
+            'internet' => [
+                'wifi',
+                'network',
+                'connection',
+            ],
+
+            'library' => [
+                'books',
+                'book',
+                'borrow',
+            ],
+
+        ];
+
+
+        $expanded = collect(
+            $keywords
+        );
+
+
+        foreach ($keywords as $keyword) {
+
+            if (
+                isset(
+                    $synonyms[$keyword]
+                )
+            ) {
+
+                foreach (
+                    $synonyms[$keyword]
+                    as $synonym
+                ) {
+
+                    $expanded->push(
+                        $synonym
+                    );
+                }
+            }
+        }
+
+
+        return $expanded
+            ->unique()
+            ->values();
+    }
+
+
+    // =========================================
+    // CONFIDENCE CALCULATION
+    // =========================================
+
+    private function calculateConfidence(
+        int $score
+    ): array {
+
+        if ($score >= 20) {
+
+            return [
+                'High',
+                95
+            ];
+        }
+
+
+        if ($score >= 12) {
+
+            return [
+                'High',
+                85
+            ];
+        }
+
+
+        if ($score >= 8) {
+
+            return [
+                'Medium',
+                70
+            ];
+        }
+
+
+        if ($score >= 4) {
+
+            return [
+                'Low',
+                55
+            ];
+        }
+
+
+        return [
+            'No Match',
+            0
+        ];
     }
 }
