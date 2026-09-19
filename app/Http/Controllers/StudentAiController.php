@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AiQuestion;
 use App\Models\KnowledgeArticle;
+use App\Services\OpenAiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -20,7 +21,7 @@ class StudentAiController extends Controller
 
 
     // =========================================
-    // AI QUESTION HISTORY
+    // AI HISTORY
     // =========================================
 
     public function history()
@@ -35,6 +36,7 @@ class StudentAiController extends Controller
             ->latest()
             ->paginate(10);
 
+
         return view(
             'student.ai-history',
             compact('questions')
@@ -46,8 +48,11 @@ class StudentAiController extends Controller
     // ASK AI
     // =========================================
 
-    public function ask(Request $request)
-    {
+    public function ask(
+        Request $request,
+        OpenAiService $openAi
+    ) {
+
         $validated = $request->validate([
             'question' => [
                 'required',
@@ -56,41 +61,51 @@ class StudentAiController extends Controller
             ],
         ]);
 
+
         $question = trim(
             $validated['question']
         );
 
+
         $normalizedQuestion =
-            $this->normalizeText($question);
+            $this->normalizeText(
+                $question
+            );
 
 
         // =========================================
-        // GET SEARCH WORDS
+        // EXTRACT SEARCH WORDS
         // =========================================
 
-        $keywords = $this->extractKeywords(
-            $normalizedQuestion
-        );
+        $keywords =
+            $this->extractKeywords(
+                $normalizedQuestion
+            );
 
 
         // =========================================
         // ADD SYNONYMS
         // =========================================
 
-        $keywords = $this->expandSynonyms(
-            $keywords
-        );
+        $keywords =
+            $this->expandSynonyms(
+                $keywords
+            );
 
 
         // =========================================
-        // GET ACTIVE KNOWLEDGE ARTICLES
+        // ACTIVE KNOWLEDGE ARTICLES
         // =========================================
 
-        $articles = KnowledgeArticle::with(
-            'category'
-        )
-            ->where('status', true)
-            ->get();
+        $articles =
+            KnowledgeArticle::with(
+                'category'
+            )
+                ->where(
+                    'status',
+                    true
+                )
+                ->get();
 
 
         // =========================================
@@ -106,13 +121,18 @@ class StudentAiController extends Controller
 
                     $score = 0;
 
-                    $title = $this->normalizeText(
-                        $article->title ?? ''
-                    );
 
-                    $content = $this->normalizeText(
-                        $article->content ?? ''
-                    );
+                    $title =
+                        $this->normalizeText(
+                            $article->title ?? ''
+                        );
+
+
+                    $content =
+                        $this->normalizeText(
+                            $article->content ?? ''
+                        );
+
 
                     $articleKeywords =
                         $this->normalizeText(
@@ -120,9 +140,7 @@ class StudentAiController extends Controller
                         );
 
 
-                    // =========================================
-                    // EXACT QUESTION MATCH
-                    // =========================================
+                    // Exact phrase in title
 
                     if (
                         $normalizedQuestion !== ''
@@ -132,87 +150,96 @@ class StudentAiController extends Controller
                             $normalizedQuestion
                         )
                     ) {
+
                         $score += 25;
                     }
 
 
-                    // =========================================
-                    // WORD MATCHING
-                    // =========================================
+                    $matchedWords = 0;
 
-                    foreach ($keywords as $keyword) {
 
-                        // Title has highest importance
+                    foreach (
+                        $keywords
+                        as $keyword
+                    ) {
+
+                        $matched = false;
+
+
+                        // Title
+
                         if (
                             Str::contains(
                                 $title,
                                 $keyword
                             )
                         ) {
+
                             $score += 6;
+
+                            $matched = true;
                         }
 
 
-                        // Knowledge keywords
+                        // Admin keywords
+
                         if (
                             Str::contains(
                                 $articleKeywords,
                                 $keyword
                             )
                         ) {
+
                             $score += 5;
+
+                            $matched = true;
                         }
 
 
-                        // Content
+                        // Article content
+
                         if (
                             Str::contains(
                                 $content,
                                 $keyword
                             )
                         ) {
+
                             $score += 2;
+
+                            $matched = true;
                         }
-                    }
 
 
-                    // =========================================
-                    // BONUS FOR MULTIPLE MATCHES
-                    // =========================================
-
-                    $matchedWords = 0;
-
-                    foreach ($keywords as $keyword) {
-
-                        if (
-                            Str::contains(
-                                $title . ' '
-                                . $articleKeywords
-                                . ' '
-                                . $content,
-                                $keyword
-                            )
-                        ) {
+                        if ($matched) {
                             $matchedWords++;
                         }
                     }
 
 
+                    // Multiple word bonus
+
                     if ($matchedWords >= 3) {
 
                         $score += 5;
 
-                    } elseif ($matchedWords >= 2) {
+                    } elseif (
+                        $matchedWords >= 2
+                    ) {
 
                         $score += 2;
                     }
 
 
                     return [
-                        'article' => $article,
-                        'score' => $score,
-                    ];
 
+                        'article' =>
+                            $article,
+
+                        'score' =>
+                            $score,
+
+                    ];
                 }
             )
             ->sortByDesc('score')
@@ -223,75 +250,145 @@ class StudentAiController extends Controller
         // BEST RESULT
         // =========================================
 
-        $bestResult = $results->first();
+        $bestResult =
+            $results->first();
 
-
-        // Minimum score required before
-        // trusting a knowledge article.
 
         $minimumScore = 4;
 
 
         // =========================================
-        // ANSWER FOUND
+        // RELIABLE ARTICLE FOUND
         // =========================================
 
         if (
             $bestResult
             &&
-            $bestResult['score'] >= $minimumScore
+            $bestResult['score']
+                >= $minimumScore
         ) {
 
             $article =
                 $bestResult['article'];
 
+
             $matchScore =
                 $bestResult['score'];
 
 
-            // =========================================
-            // CONFIDENCE
-            // =========================================
-
             [
                 $confidenceLabel,
                 $confidencePercent
-            ] = $this->calculateConfidence(
-                $matchScore
-            );
+            ] =
+                $this->calculateConfidence(
+                    $matchScore
+                );
 
 
             // =========================================
-            // FRIENDLIER ANSWER
+            // SELECT TRUSTED CONTEXT
             // =========================================
 
-            $answer =
-                "I found information that should help.\n\n"
-                . $article->content;
+            $contextResults = $results
+                ->filter(
+                    function ($result) use (
+                        $minimumScore
+                    ) {
+
+                        return
+                            $result['score']
+                            >= $minimumScore;
+                    }
+                )
+                ->take(3);
+
+
+            // =========================================
+            // BUILD CONTEXT FOR GENERATIVE AI
+            // =========================================
+
+            $context = $contextResults
+                ->map(
+                    function ($result) {
+
+                        $item =
+                            $result['article'];
+
+
+                        $category =
+                            $item->category?->name
+                            ?? 'General';
+
+
+                        return
+                            "ARTICLE TITLE: "
+                            . $item->title
+                            . "\n"
+                            . "CATEGORY: "
+                            . $category
+                            . "\n"
+                            . "CONTENT:\n"
+                            . $item->content;
+                    }
+                )
+                ->implode(
+                    "\n\n--------------------\n\n"
+                );
+
+
+            // =========================================
+            // CALL GENERATIVE AI
+            // =========================================
+
+            $generatedAnswer =
+                $openAi
+                    ->generateGroundedAnswer(
+                        $question,
+                        $context
+                    );
+
+
+            // =========================================
+            // FALLBACK
+            // =========================================
+
+            if (
+                !empty(
+                    $generatedAnswer
+                )
+            ) {
+
+                $answer =
+                    $generatedAnswer;
+
+            } else {
+
+                // If API key is missing,
+                // API is offline, etc.
+
+                $answer =
+                    $article->content;
+            }
 
 
             // =========================================
             // RELATED ARTICLES
             // =========================================
 
-            $relatedArticles = $results
-                ->filter(
-                    function ($result) use (
-                        $article,
-                        $minimumScore
-                    ) {
+            $relatedArticles =
+                $contextResults
+                    ->pluck('article')
+                    ->filter(
+                        function ($item) use (
+                            $article
+                        ) {
 
-                        return
-                            $result['score']
-                                >= $minimumScore
-                            &&
-                            $result['article']->id
+                            return
+                                $item->id
                                 !== $article->id;
-
-                    }
-                )
-                ->take(3)
-                ->pluck('article');
+                        }
+                    )
+                    ->values();
 
 
             // =========================================
@@ -299,6 +396,7 @@ class StudentAiController extends Controller
             // =========================================
 
             AiQuestion::create([
+
                 'user_id' =>
                     auth()->id(),
 
@@ -316,12 +414,13 @@ class StudentAiController extends Controller
 
                 'found_answer' =>
                     true,
+
             ]);
 
         }
 
         // =========================================
-        // NO RELIABLE ANSWER
+        // NO TRUSTED INFORMATION FOUND
         // =========================================
 
         else {
@@ -330,7 +429,8 @@ class StudentAiController extends Controller
 
             $matchScore = 0;
 
-            $confidenceLabel = 'No Match';
+            $confidenceLabel =
+                'No Match';
 
             $confidencePercent = 0;
 
@@ -338,16 +438,21 @@ class StudentAiController extends Controller
                 collect();
 
 
+            // IMPORTANT:
+            // We do NOT call the generative AI here.
+            // This prevents invented university answers.
+
             $answer =
-                "I couldn't find a reliable answer "
-                . "for that question in the university "
+                "I couldn't find reliable information "
+                . "about that question in the university "
                 . "knowledge base.\n\n"
-                . "Try asking the question using different "
-                . "words, check the FAQs, or create a "
-                . "support ticket so a staff member can help.";
+                . "Please check the FAQs or create a "
+                . "support ticket so a staff member "
+                . "can assist you.";
 
 
             AiQuestion::create([
+
                 'user_id' =>
                     auth()->id(),
 
@@ -365,6 +470,7 @@ class StudentAiController extends Controller
 
                 'found_answer' =>
                     false,
+
             ]);
         }
 
@@ -392,7 +498,9 @@ class StudentAiController extends Controller
         string $text
     ): string {
 
-        $text = Str::lower($text);
+        $text =
+            Str::lower($text);
+
 
         $text = preg_replace(
             '/[^a-z0-9\s]/',
@@ -400,18 +508,20 @@ class StudentAiController extends Controller
             $text
         );
 
+
         $text = preg_replace(
             '/\s+/',
             ' ',
             $text
         );
 
+
         return trim($text);
     }
 
 
     // =========================================
-    // EXTRACT IMPORTANT WORDS
+    // IMPORTANT WORDS
     // =========================================
 
     private function extractKeywords(
@@ -419,6 +529,7 @@ class StudentAiController extends Controller
     ) {
 
         $stopWords = [
+
             'a',
             'an',
             'the',
@@ -432,32 +543,39 @@ class StudentAiController extends Controller
             'our',
             'you',
             'your',
+
             'how',
             'what',
             'where',
             'when',
             'why',
             'who',
+
             'can',
             'could',
             'would',
             'should',
+
             'do',
             'does',
             'did',
+
             'to',
             'for',
             'of',
             'in',
             'on',
             'at',
+
             'and',
             'or',
+
             'please',
             'help',
             'with',
             'about',
             'from',
+
         ];
 
 
@@ -480,7 +598,6 @@ class StudentAiController extends Controller
                             $word,
                             $stopWords
                         );
-
                 }
             )
             ->unique()
@@ -489,7 +606,7 @@ class StudentAiController extends Controller
 
 
     // =========================================
-    // SYNONYM SUPPORT
+    // SYNONYMS
     // =========================================
 
     private function expandSynonyms(
@@ -561,20 +678,21 @@ class StudentAiController extends Controller
             ],
 
             'library' => [
-                'books',
                 'book',
+                'books',
                 'borrow',
             ],
 
         ];
 
 
-        $expanded = collect(
-            $keywords
-        );
+        $expanded =
+            collect($keywords);
 
 
-        foreach ($keywords as $keyword) {
+        foreach (
+            $keywords as $keyword
+        ) {
 
             if (
                 isset(
@@ -602,7 +720,7 @@ class StudentAiController extends Controller
 
 
     // =========================================
-    // CONFIDENCE CALCULATION
+    // CONFIDENCE
     // =========================================
 
     private function calculateConfidence(
