@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminNoticeController;
 use App\Http\Controllers\StudentNoticeController;
 use App\Http\Controllers\AdminKnowledgeController;
 use App\Http\Controllers\StudentAiController;
+use App\Http\Controllers\AdminReportController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -182,6 +183,14 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
 // ========================================
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
+    // ========================================
+// REPORTS
+// ========================================
+
+Route::get(
+    '/admin/reports',
+    [AdminReportController::class, 'index']
+)->name('admin.reports');
 
 // ========================================
 // KNOWLEDGE BASE

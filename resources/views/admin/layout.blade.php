@@ -105,12 +105,11 @@
 
 
             <a
-                href="#"
-                class="block px-4 py-3 rounded-lg hover:bg-slate-700"
-            >
-                Reports
-            </a>
-
+    href="{{ route('admin.reports') }}"
+    class="block px-4 py-3 rounded-lg hover:bg-slate-700"
+>
+    Reports
+</a>
 
             <a
                 href="{{ route('profile.edit') }}"
