@@ -13,6 +13,7 @@ use App\Http\Controllers\StudentNoticeController;
 use App\Http\Controllers\AdminKnowledgeController;
 use App\Http\Controllers\StudentAiController;
 use App\Http\Controllers\AdminReportController;
+use App\Http\Controllers\AdminDashboardController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -183,6 +184,11 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
 // ========================================
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    Route::get(
+        '/admin/dashboard',
+        [AdminDashboardController::class, 'index']
+    )->name('admin.dashboard');
     // ========================================
 // REPORTS
 // ========================================
@@ -300,9 +306,7 @@ Route::delete(
 
 
 
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    
 
 
     // ========================================
