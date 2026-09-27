@@ -1,66 +1,249 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🤖 AI-Powered Student Support System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+An AI-powered web application developed to provide students with faster and more organized academic and technical support.
 
-## About Laravel
+The system includes separate **Student, Staff, and Admin portals**, an AI-based student assistant, support ticket management, FAQs, notices, a knowledge base, and system analytics.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📌 Project Overview
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The **AI-Powered Student Support System** is designed to help students quickly find answers to common university-related questions and communicate with support staff when additional assistance is required.
 
-## Learning Laravel
+The AI Assistant searches information stored in the system's Knowledge Base and provides relevant responses. If reliable information is unavailable, students can create a support ticket for assistance from a staff member.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## ✨ Main Features
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 👨‍🎓 Student Portal
 
-## Laravel Sponsors
+- Student registration and login
+- Student dashboard
+- AI Student Assistant
+- AI question history
+- View FAQs
+- View university notices
+- Create support tickets
+- View ticket status
+- Reply to staff messages
+- View recent tickets
+- Manage profile
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 👨‍💼 Staff Portal
 
-### Premium Partners
+- Staff dashboard
+- View student support tickets
+- View ticket details
+- Assign tickets
+- Reply to students
+- Update ticket status
+- Mark tickets as:
+  - Pending
+  - In Progress
+  - Resolved
+  - Closed
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 🛠️ Admin Portal
 
-## Contributing
+- Admin dashboard
+- Manage students
+- Manage staff accounts
+- Manage support categories
+- Manage FAQs
+- Manage notices
+- Manage Knowledge Base articles
+- View AI activity
+- View unanswered AI questions
+- View ticket statistics
+- Reports and analytics
+- User activation/deactivation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 🤖 AI Assistant
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The system includes an AI-powered student support assistant.
 
-## Security Vulnerabilities
+### AI Workflow
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```text
+Student Question
+       ↓
+Question Processing
+       ↓
+Knowledge Base Search
+       ↓
+Relevant Information Found?
+       ↓
+       ├── Yes
+       │     ↓
+       │  Trusted Knowledge Context
+       │     ↓
+       │  AI Response Generation
+       │     ↓
+       │  Answer Displayed to Student
+       │
+       └── No
+             ↓
+       Suggest FAQ or Support Ticket
 
-## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+       🧠 AI Features
+- Knowledge Base retrieval
+- Keyword matching
+- Synonym-based matching
+- Relevance scoring
+- Confidence scoring
+- Grounded AI responses
+- AI question history
+- Unanswered question tracking
+- Knowledge source identification
+- Support-ticket fallback
+🎫 Support Ticket System
+Students can create support requests by selecting a category and providing a subject, description, and priority.
+Staff members can then:
+1. View the ticket
+2. Assign the ticket
+3. Reply to the student
+4. Update its status
+5. Resolve or close the ticket
+Students and staff can communicate through a two-way ticket conversation system.
+🔐 Role-Based Access Control
+The system contains three user roles:
+Role	Access
+Student	AI Assistant, FAQs, Notices, Tickets, Profile
+Staff	Dashboard, Support Tickets, Ticket Replies
+Admin	Full system management and analytics
+
+
+Laravel middleware is used to prevent users from accessing unauthorized portals.
+🛠️ Technologies Used
+Backend
+- Laravel 12
+- PHP
+- Laravel Eloquent ORM
+Frontend
+- Blade Templates
+- Tailwind CSS
+- JavaScript
+- Vite
+Database
+- MySQL
+- phpMyAdmin
+AI
+- OpenAI API
+- Knowledge Base Retrieval
+- Keyword and Relevance Matching
+Development Tools
+- Visual Studio Code
+- XAMPP
+- Composer
+- Node.js
+- npm
+- Git
+- GitHub
+🗄️ Main Database Tables
+The system uses tables including:
+users
+categories
+tickets
+ticket_replies
+faqs
+notices
+knowledge_articles
+ai_questions
+
+📊 Reports & Analytics
+The Admin Portal provides information such as:
+- Number of students
+- Number of staff members
+- Total support tickets
+- Pending tickets
+- In-progress tickets
+- Resolved tickets
+- Closed tickets
+- Total AI questions
+- AI answers found
+- Unanswered AI questions
+- Popular support categories
+- Recent system activity
+
+
+▶️ Running the Project Later
+After closing everything, use these steps:
+1. Open XAMPP
+2. Start MySQL
+3. Open the project in VS Code
+4. Run:
+php artisan serve
+
+5. Open another terminal and run:
+npm run dev
+
+6. Open:
+http://127.0.0.1:8000
+
+📷 Project Screenshots
+Student Dashboard
+ 
+AI Assistant
+ 
+Support Tickets
+ 
+Staff Dashboard
+ 
+Admin Dashboard
+ 
+Knowledge Base
+ 
+Reports & Analytics
+ 
+Add the corresponding screenshots inside a folder named screenshots.
+
+📁 Project Structure
+ai-student-support/
+│
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   └── Middleware/
+│   │
+│   ├── Models/
+│   └── Services/
+│
+├── bootstrap/
+├── config/
+├── database/
+├── public/
+├── resources/
+│   └── views/
+│       ├── admin/
+│       ├── auth/
+│       ├── staff/
+│       └── student/
+│
+├── routes/
+│   └── web.php
+│
+├── tests/
+├── .env.example
+├── artisan
+├── composer.json
+├── package.json
+└── README.md
+
+🔒 Security Features
+- Authentication
+- Password hashing
+- CSRF protection
+- Role-based middleware
+- Form validation
+- Protected Admin routes
+- Protected Staff routes
+- Student ticket ownership validation
+- Environment-based API key configuration
+🎯 Project Purpose
+The main purpose of this project is to improve student support by combining traditional support-ticket management with AI-assisted question answering.
+It provides students with faster access to information while allowing staff and administrators to manage complex support requests efficiently.
